@@ -1,0 +1,33 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+default_stages: [pre-commit]
+default_install_hook_types: [pre-commit, commit-msg]
+default_language_version:
+  node: "24.10.0"
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        stages: ["pre-commit"]
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+        stages: ["pre-commit"]
+      - id: mixed-line-ending
+        name: LF for all files
+        args: [--fix=lf]
+        exclude: '\.bat$'
+      - id: mixed-line-ending
+        name: CRLF for windows scripts
+        args: [--fix=crlf]
+        files: '\.bat$'
+      - id: check-added-large-files
+      - id: check-merge-conflict
+
+  # commit-msg hooks
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: acc9d9de6369b76d22cb4167029d2035e8730b98  # frozen: v0.19.1
+    hooks:
+      - id: gitlint
+        stages: [commit-msg]
