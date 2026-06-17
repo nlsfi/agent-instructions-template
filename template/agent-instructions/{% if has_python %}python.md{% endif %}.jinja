@@ -1,0 +1,24 @@
+﻿# Python
+
+## Type hints
+
+- All functions must have type hints for parameters and return value.
+- Use modern union syntax, for example `str | None` instead of `Optional[str]`.
+- Use the `typing` module for complex type definitions.
+
+## Comments
+
+- Keep comments minimal.
+- Public functions and methods should include a concise docstring.
+- Do not add comments in tests.
+- Never write comments that explain obvious code behavior; refactor the code instead.
+- Never document parameters in comments; rely on type hints.
+- Never use section-separator comments; extract code into functions.
+
+## Testing
+
+- Use module-level test functions only; do not use test classes.
+- Use descriptive names in the form `test_<action>_<condition>_<expected_result>`.
+- Do not add comments in test code.
+- Use `pytest` fixtures for setup and teardown.
+- Use `pytest.mark.parametrize` when testing multiple input values.

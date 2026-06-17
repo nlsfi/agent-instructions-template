@@ -1,0 +1,38 @@
+has_python:
+  type: bool
+  default: false
+  help: Include Python coding instructions
+
+has_java:
+  type: bool
+  default: false
+  help: Include Java coding instructions
+
+has_sql:
+  type: bool
+  default: false
+  help: Include SQL coding instructions
+
+has_ansible:
+  type: bool
+  default: false
+  help: Include Ansible coding instructions
+
+has_jenkins:
+  type: bool
+  default: false
+  help: Include Jenkins pipeline instructions
+
+has_qgis:
+  type: bool
+  default: false
+  help: Include QGIS plugin instructions
+
+has_airflow:
+  type: bool
+  default: false
+  help: Include Airflow instructions
+
+_subdirectory: template
+
+_min_copier_version: "9.10.0"
