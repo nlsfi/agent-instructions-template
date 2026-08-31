@@ -1,1 +1,37 @@
 ﻿# Ansible
+
+## Module usage
+
+- Prefer Ansible modules over `command` and `shell` when an equivalent module exists.
+- Use fully qualified collection names (FQCN), for example `ansible.builtin.copy`.
+- Keep tasks idempotent so repeated runs converge without unintended changes.
+
+## Variables
+
+- Prefix role variables with the role name to avoid cross-role collisions.
+- Define defaults in `defaults/main.yml` and override through inventory or play vars.
+- Avoid generic variable names like `port`, `enabled`, and `timeout` inside roles.
+- Guard optional variables with `is defined` checks or `default(...)` before using them in `when` conditions and templates.
+
+## Loops and task structure
+
+- Do not attempt nested loops in a single task.
+- For outer and inner iteration, loop on `include_tasks` and run the inner loop in the included file.
+- Use `loop_control.loop_var` when loop variable names could conflict.
+
+## Failure handling
+
+- For `command` and `shell`, define explicit `changed_when` and `failed_when` conditions.
+- Do not use `ignore_errors` unless follow-up logic validates the outcome.
+- Use `register` carefully and guard checks for skipped tasks before reading `.rc` or `.stdout`.
+
+## Role composition
+
+- Use `import_role` for static role inclusion resolved at parse time.
+- Use `include_role` for conditional or looped role execution at runtime.
+- Be explicit about tags and handler behavior when choosing dynamic role inclusion.
+
+## Secrets
+
+- Store credentials and sensitive values in Ansible Vault, not plaintext playbooks or vars files.
+- Treat unencrypted secrets as a blocking issue and migrate them to Vault before merge.
