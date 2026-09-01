@@ -1,1 +1,34 @@
 ﻿# QGIS
+
+## Threading
+
+- Never access `QgsVectorLayer`, data providers, or `layer.getFeatures()` from background threads.
+- Fetch features on the main thread, then pass plain Python data to worker threads.
+- Never touch `QgsProject.instance()`, map canvas, or Qt widgets from workers.
+- Return worker results via Qt signals instead of shared mutable state.
+
+## Object lifetime and ownership
+
+- Treat SIP-wrapped objects as mixed Python/C++ ownership; avoid relying on implicit garbage collection timing.
+- Keep a strong reference to memory-provider layers unless they are owned by the project.
+- Release GDAL datasets explicitly (`dataset = None`) when processing completes.
+- Disconnect long-lived signal connections when tools or widgets are deactivated.
+
+## CRS handling
+
+- Validate CRS with `layer.crs().isValid()` and inspect `layer.crs().authid()` before spatial logic.
+- Do not assume project CRS and layer CRS are the same, even when rendering looks correct.
+- Pass explicit CRS and transform context when writing new vector outputs.
+
+## Feature access and editing
+
+- Use `QgsFeatureRequest` to limit attributes, geometry, and feature subsets early.
+- Do not mutate layer features while iterating a live provider iterator.
+- For edits, use `startEditing()` and always check `commitChanges()` return value.
+- Call `updateFields()` after schema changes and `updateExtents()` after geometry inserts.
+
+## Processing and plugin workflow
+
+- Prefer QGIS Processing algorithms over shelling out or reimplementing core geoprocessing.
+- Keep plugin teardown explicit: stop timers and disconnect signals in `deactivate()`.
+- If plugin reload causes duplicate handlers, check for missing disconnects before deeper refactors.
