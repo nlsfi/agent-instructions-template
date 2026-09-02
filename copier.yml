@@ -1,37 +1,37 @@
 has_python:
   type: bool
   default: false
-  help: Include Python coding instructions
+  help: Include nls-python skill
 
 has_java:
   type: bool
   default: false
-  help: Include Java coding instructions
+  help: Include nls-java skill
 
 has_sql:
   type: bool
   default: false
-  help: Include SQL coding instructions
+  help: Include nls-sql skill
 
 has_ansible:
   type: bool
   default: false
-  help: Include Ansible coding instructions
+  help: Include nls-ansible skill
 
 has_jenkins:
   type: bool
   default: false
-  help: Include Jenkins pipeline instructions
+  help: Include nls-jenkins skill
 
 has_qgis:
   type: bool
   default: false
-  help: Include QGIS plugin instructions
+  help: Include nls-qgis skill
 
 has_airflow:
   type: bool
   default: false
-  help: Include Airflow instructions
+  help: Include nls-airflow skill
 
 _subdirectory: template
 
