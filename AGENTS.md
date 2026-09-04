@@ -2,8 +2,25 @@
 
 ## Project overview
 This repo is the Copier template source for the `Agent Skills` system used across NLS repositories.
+The `template/` directory contains files that Copier copies and renders into a target repository;
+those files are used by agents in the target repository, not as this repository's own instructions.
 It produces per-technology `SKILL.md` files (`nls-python`, `nls-sql`, `nls-jenkins`, etc.) under
-`.agents/skills/` in consumer repos.
+`.agents/skills/` in target repositories.
+
+This repository and a Copier-generated target repository are separate contexts. This repository has
+its own `AGENTS.md` for editing the template source. A target repository has its own root
+`AGENTS.md` for editing that repository and may additionally receive generated instructions under
+`.agents/skills/`. Do not add a `.agents/` directory at this repository's root just because it
+appears in the generated target layout; the `.agents/` path under `template/` is Copier source.
+
+## Template source versus target instructions
+- Skills and other instruction files under `template/` are Copier source files only. They are never
+  loaded or used as agent instructions while working in this repository; they are used only in
+  target repositories after Copier renders them.
+- When changing a generated skill or other Copier-managed output, edit the corresponding source
+  file under `template/`. Do not create a rendered `.agents/` tree at this repository's root.
+- In a target (consumer) repository, agents use that repository's root `AGENTS.md` and the
+  rendered `.agents/skills/nls/...` files.
 
 ## Tech stack
 - **Markdown** — all template content and architecture docs
@@ -17,9 +34,9 @@ It produces per-technology `SKILL.md` files (`nls-python`, `nls-sql`, `nls-jenki
 ```
 agent-instructions-template/
 ├── .github/exploration/             ← Architecture decision records (not CI workflows)
-├── template/                        ← Copier _subdirectory; everything here is copied to consumers
+├── template/                        ← Copier _subdirectory; copied/rendered into target repositories
 │   ├── .copier-answers.yml.jinja    ← Records feature-flag answers in the consumer repo
-│   └── .agents/skills/nls/
+│   └── .agents/skills/nls/           ← Copier source for the generated target path
 │       ├── {% if has_python %}python{% endif %}/SKILL.md.jinja
 │       ├── {% if has_java %}java{% endif %}/SKILL.md.jinja
 │       ├── {% if has_sql %}sql{% endif %}/SKILL.md.jinja
@@ -33,9 +50,11 @@ agent-instructions-template/
 ├── .editorconfig                    ← Indentation and line-ending rules per file type
 └── README.md                        ← Consumer usage and dev setup
 ```
-New template module files go under `template/.agents/skills/nls/` and use Jinja-conditional
-module directory names (`{% if has_python %}python{% endif %}`) so disabled modules do not render
-their directory or `SKILL.md` file in consumer repositories.
+New template module files go under the source path `template/.agents/skills/nls/` and use
+Jinja-conditional module directory names (`{% if has_python %}python{% endif %}`). Copier renders
+these source paths into `.agents/skills/nls/` in target repositories, so disabled modules do not
+render their directory or `SKILL.md` file there. The repository root intentionally does not have an
+`.agents/` directory; do not create one there.
 Temporary plans and resources go in `.github/exploration/`.
 
 ## Module instructions routing
