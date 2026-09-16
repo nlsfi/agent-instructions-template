@@ -1,9 +1,63 @@
 ---
 name: nls-java
-description: NLS Java coding conventions for Java source and build changes in repositories that include Java services or libraries.
+description: NLS Java coding conventions for .java changes, including dependency injection, naming, null-handling, comment rules, and JUnit testing patterns.
 ---
 
-## Scope
+## Types and null-handling
 
-- Apply this skill when editing Java code, Java tests, or Java build configuration.
-- Keep Java-specific conventions here as they are defined for NLS repositories.
+- Never return `null`; return `Optional<T>` for a possibly-absent single value and an empty collection for absent lists/sets/maps.
+- Use `var` for local variables only when the type is obvious from the right-hand side.
+- Use records for immutable DTOs and value objects.
+- Use generics everywhere; never use raw types.
+- Prefer `List`/`Set`/`Map` interfaces over concrete implementation types in signatures.
+
+## Naming
+
+- Classes/interfaces/enums/records: `PascalCase`.
+- Methods and variables: `camelCase`, full words, no abbreviations.
+- Constants: `UPPER_SNAKE_CASE`, declared `private static final`.
+- Boolean names: `isX`, `hasX`, `canX`.
+- Packages: lowercase, dot-separated, no underscores.
+
+## Imports
+
+- Absolute imports only; never wildcard imports.
+- Order imports in groups separated by a blank line: `java.*`/`javax.*`, then third-party (`org.*`, `com.*`, `io.*`, alphabetical), then local application packages.
+- Never use static imports except for constants and test assertion methods.
+
+## Comments
+
+- Keep comments minimal; code should be self-documenting through clear naming and small methods.
+- Do not add comments in tests.
+- Never write comments that explain obvious code behavior; extract a well-named method instead.
+- Never document parameters/behavior in comments; use Javadoc and precise types instead.
+- Never use section-separator comments inside a method; extract code into functions.
+- Acceptable comments: complex algorithm explanations, framework/API workarounds, non-obvious business rules, and `TODO`/`FIXME` markers.
+- Add Javadoc for public API methods and non-obvious service methods; skip it for simple getters/setters and self-explanatory methods.
+
+## Error handling
+
+- Throw specific, custom exceptions from service/business logic; never swallow exceptions in an empty catch block.
+- Never catch generic `Exception` and return `null` or a default value silently; rethrow, wrap, or log and rethrow.
+- Handle/translate exceptions at the boundary (controller/handler layer), not deep inside business logic.
+- Log with a class-level `private static final Logger LOGGER` and parameterized messages (`LOGGER.info("Creating {}", id)`), never string concatenation.
+
+## Formatting
+
+- Always use braces, even for single-statement `if`/`for`/`while` blocks.
+- One blank line between methods; one blank line after package/import blocks.
+- Keep line length within the project's configured limit; wrap long parameter lists and chained calls for readability.
+
+## Class structure
+
+- Order members: static constants, instance fields, constructors, public methods, package-private methods, private methods, static methods.
+
+## Testing
+
+- Use JUnit 5 (`org.junit.jupiter.api.Test`); use module-level test methods, avoid unnecessary nested classes.
+- Do not add comments in test code.
+- Use descriptive test names in the form `methodUnderTest_condition_expectedResult`, plus a `@DisplayName` with a natural-language description.
+- Mock all external dependencies with Mockito (`@Mock`, `@ExtendWith(MockitoExtension.class)`); construct the system under test manually with those mocks via its constructor.
+- Prefer AssertJ (`assertThat(...)`) over plain JUnit assertions.
+- Test one behavior per test method; verify interactions with `verify(...)` only when a side effect matters.
+- Use fixture/test-data-builder helper methods or classes for reusable test data instead of duplicating object construction.
