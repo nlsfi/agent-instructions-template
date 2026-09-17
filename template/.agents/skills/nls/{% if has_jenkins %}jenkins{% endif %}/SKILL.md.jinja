@@ -7,3 +7,60 @@ description: NLS Jenkins pipeline conventions for Jenkinsfile and shared-library
 
 - Apply this skill when editing `Jenkinsfile` content or Jenkins shared-library pipeline code.
 - Keep Jenkins-specific conventions here as they are defined for NLS repositories.
+
+## Pipeline structure
+
+- Prefer Declarative Pipeline (`pipeline { ... }`) as the default style.
+- Use `agent none` at top level and define stage-specific agents (`label 'containers'`, `label 'windows'`, or `any`) per workload.
+- Use `options { skipDefaultCheckout(true) }` when checkout is not needed in every stage.
+- Keep stages focused on one responsibility (`Init`, `Build`, `Deploy`, `Test`, `Publish`) and split large logic into helper methods/classes.
+- Use `when` conditions to gate release-only, branch-specific, or parameter-dependent stages.
+
+## Checkout and repository handling
+
+- Use explicit checkouts via `checkout scmGit(...)` with pinned repository URLs and credentials.
+- Include checkout extensions used in NLS pipelines (`localBranch()`, `pruneStaleBranch()`, `cleanBeforeCheckout()`) unless there is a clear reason not to.
+- Treat branch/tag/commit refs as explicit inputs; avoid hidden assumptions about default branches.
+- Validate version metadata from source files (`version.txt`, `pom.xml`, package metadata) before publishing or tagging.
+
+## Credentials and secrets
+
+- Always access secrets through Jenkins credentials APIs (`withCredentials`, `usernamePassword`, `sshUserPrivateKey`, `file`, `gitUsernamePassword`).
+- Never hardcode tokens, passwords, SSH keys, or secret file contents.
+- Mount credential files read-only where possible and clean generated secret-bearing files in `post { always { ... } }`.
+- Keep credential scope minimal by wrapping only the steps that require the secret.
+
+## Shell and container execution
+
+- Use labeled shell/batch steps (`sh label: '...', script: '...'`) for long or critical commands.
+- Prefer reproducible containerized tooling (`podman run` / `docker.image(...).inside`) for Python, Maven, Ansible, and linters.
+- Keep multi-line shell commands readable and fail-fast (`--fail`, explicit checks like `test -f ...` when needed).
+- When supporting both Windows and Unix agents, branch with `isUnix()` and use `sh`/`bat` accordingly.
+
+## Cross-job orchestration and artifacts
+
+- Trigger downstream jobs with explicit `build(job: ..., parameters: [...], propagate: ..., wait: ...)` settings.
+- Pass required parameters explicitly; do not rely on implicit environment leakage between jobs.
+- Use `stash`/`unstash` for cross-stage artifacts and keep include patterns specific.
+- For publishing (Artifactory, reports, SBOM), verify artifact existence and version before upload.
+
+## Quality, status, and observability
+
+- Update external status checks consistently (for example GitLab commit status) across running/success/failure paths.
+- Use stage-level `post` blocks for status updates, test result publishing (`junit`), coverage, and cleanup.
+- Configure timeouts for long-running or potentially hanging stages.
+- Set clear `currentBuild.displayName` and/or `currentBuild.description` when helpful for operations and release traceability.
+
+## Shared-library guidance
+
+- Keep shared-library steps backward-compatible unless a breaking change is explicitly planned and documented.
+- Validate input parameters early and fail with clear, actionable error messages.
+- Keep wrappers around external systems (GitLab, Artifactory, Dependency Track) explicit and testable.
+- Avoid global mutable state in library code; pass required context through parameters.
+
+## Safety and review
+
+- Treat release/tag/publish steps as high-risk: verify refs, versions, and target repositories before execution.
+- For destructive or irreversible operations (tag push, release publish, environment prune), make intent explicit in stage naming and logs.
+- In reviews, call out risks around credential handling, agent mismatch, skipped cleanup, and unintended downstream triggers.
+- If environment-specific behavior is unclear (labels, credentials IDs, plugin availability), state assumptions and ask before finalizing.
