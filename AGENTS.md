@@ -44,6 +44,10 @@ agent-instructions-template/
 │       ├── {% if has_jenkins %}jenkins{% endif %}/SKILL.md.jinja
 │       ├── {% if has_qgis %}qgis{% endif %}/SKILL.md.jinja
 │       └── {% if has_airflow %}airflow{% endif %}/SKILL.md.jinja
+├── external-skills/                  ← Curated allow-list for third-party skills
+│   └── registry.yml                  ← Destination folder, source, commit pin, license, and notes
+├── scripts/                          ← Copier task scripts
+│   └── vendor_external_skills.py     ← Clones and vendors selected external skills
 ├── copier.yml                       ← Feature-flag questions; sets _subdirectory: template
 ├── .pre-commit-config.yaml          ← All linting hooks; frozen SHAs — update only via pre-commit autoupdate
 ├── .gitlint                         ← Conventional Commits rules enforced on every commit
@@ -57,9 +61,28 @@ render their directory or `SKILL.md` file there. The repository root intentional
 `.agents/` directory; do not create one there.
 Temporary plans and resources go in `.github/exploration/`.
 
+External skills are not Copier template files: `copier.yml` renders the
+selected names into `template/.agents/skills/vendor-selection.yml`, and the
+post-generation task uses the root `external-skills/registry.yml` to validate
+and fetch the selected sources into the consumer repository. Each registry
+entry must identify a repository, a 40-character lowercase commit `ref`, a
+documentation-only `ref_label`, a safe destination `folder`, a skill
+`subpath` containing `SKILL.md`, and the applicable license. Skills are
+fetched into `.agents/skills/<folder>/<name>/` and share one
+`THIRD_PARTY_LICENSE` file per folder. All entries in one folder must use the
+same repository and license; incompatible groupings are rejected and must use
+separate folders. Keep dependency or setup information in `notes`.
+Consumer repositories select skill names only; they cannot choose the version
+to fetch.
+
 ## Module instructions routing
 - Consumer repositories should keep explicit routing lines in their root `AGENTS.md`.
 - Example: "When editing Python files, load `nls-python`; when editing Ansible roles, load `nls-ansible`."
+- Add explicit routing for vendored skills when they are needed for a domain;
+  for example, route PyQGIS work to `pyqgis-dev` and migration work to
+  `qgis4-migration`.
+- Follow registry notes for related skills. `qgis4-migration` refers to
+  `pyqgis-dev` scripts by relative path, so select both together.
 - Do not rely on auto-discovery alone for domains where missing the skill can cause regressions.
 
 ## Build and test commands
@@ -112,3 +135,11 @@ Hook that runs on `commit-msg`:
    to prevent `{}` being parsed as a script block.
 2. **pre-commit not installed**: Hooks only run after `pre-commit install`. On a fresh clone, committing
    without running that command will bypass all checks silently.
+3. **External skill updates are destructive by design**: The vendoring task replaces each selected
+   `.agents/skills/<folder>/<name>/` directory wholesale. Do not hand-edit a vendored copy; fork it
+   under a different name for local changes. Cleanup of old or unselected directories is the
+   consumer's responsibility.
+4. **External skill prerequisites**: Vendoring requires Git and network access. A stale registry entry
+   fails when its configured `subpath/SKILL.md` cannot be found, and an unregistered skill is refused.
+5. **External skill dependencies**: Select related skills together when a registry note requires it;
+   vendoring one skill does not automatically vendor its dependencies.

@@ -1,0 +1,26 @@
+# Curated allow-list of external Agent Skills sources.
+
+pyqgis-dev:
+  repo: https://github.com/GispoCoding/pyqgis-skills.git
+  folder: gispo-coding-pyqgis
+  subpath: skills/pyqgis-dev
+  ref: 9753052d1135b1ffbcd520efe0d2191fb52c1dcc
+  ref_label: corresponds to v0.3.0
+  license: MIT
+  notes: >
+    Day-to-day PyQGIS/PyQt API lookups (live QGIS Python, then SIP
+    bindings, then C++ sources; stubs last). Requires a local QGIS
+    install with Python (see upstream README "Configure" section) -
+    one-time per-developer-machine setup this task does NOT handle.
+
+qgis4-migration:
+  repo: https://github.com/GispoCoding/pyqgis-skills.git
+  folder: gispo-coding-pyqgis
+  subpath: skills/qgis4-migration
+  ref: 9753052d1135b1ffbcd520efe0d2191fb52c1dcc
+  ref_label: corresponds to v0.3.0
+  license: MIT
+  notes: >
+    QGIS 3 (Qt5) -> QGIS 4 (Qt6) plugin migration procedure. Refers to
+    pyqgis-dev's scripts by relative path - vendor both together or not
+    at all.

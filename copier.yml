@@ -33,6 +33,29 @@ has_airflow:
   default: false
   help: Include nls-airflow skill
 
+# =============================================================================
+# External Agent Skills (vendored from third-party repos)
+# =============================================================================
+
+use_external_skills:
+  type: bool
+  help: "Vendor curated external Agent Skills into .agents/skills/?"
+  default: false
+
+external_skills:
+  type: str
+  multiselect: true
+  help: "Which external skills to vendor? (see external-skills/registry.yml for sources)"
+  choices:
+    - pyqgis-dev
+    - qgis4-migration
+  default: []
+  when: "{{ use_external_skills }}"
+
+
 _subdirectory: template
+
+_tasks:
+  - "python3 {{ _copier_conf.src_path }}/scripts/vendor_external_skills.py"
 
 _min_copier_version: "9.10.0"
