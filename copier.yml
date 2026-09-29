@@ -49,6 +49,9 @@ external_skills:
   choices:
     - pyqgis-dev
     - qgis4-migration
+    - ansible-good-practices
+    - ansible-new-molecule
+    - ansible-new-role
   default: []
   when: "{{ use_external_skills }}"
 

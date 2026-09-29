@@ -52,7 +52,8 @@ During `copier copy` or `copier update`, set **Vendor curated external Agent
 Skills** to `true` and select one or more skills. Only skills listed in the
 template's curated allow-list at `external-skills/registry.yml` can be
 fetched. The current choices include
-`pyqgis-dev` and `qgis4-migration`.
+`pyqgis-dev`, `qgis4-migration`, `ansible-good-practices`,
+`ansible-new-molecule`, and `ansible-new-role`.
 
 Each registry entry pins a selected skill to a 40-character commit SHA and
 includes a human-readable `ref_label`; consumers cannot override that pin.
@@ -70,6 +71,13 @@ A registry entry's optional `extra_paths` list (each item: `subpath` +
 `dest`) vendors those sibling directories alongside `SKILL.md`, at
 `.agents/skills/<folder>/<name>/<dest>/`. `EXTERNAL_SKILLS.md` annotates any
 skill that vendored extra paths, e.g. `` `folder/name` (+references) ``.
+
+The Ansible skills provide distinct workflows: `ansible-good-practices`
+reviews existing automation, `ansible-new-molecule` scaffolds Molecule tests,
+and `ansible-new-role` scaffolds a new role. The role skill can use
+`ansible-creator` when installed and optionally uses the `ansible-know` MCP
+server for module-aware task generation; it falls back to manual scaffolding
+without those tools.
 
 Vendored directories are replaced wholesale on the next `copier update`; do
 not edit them in place. Fork a skill into a separately named local skill if

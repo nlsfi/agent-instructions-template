@@ -24,3 +24,54 @@ qgis4-migration:
     QGIS 3 (Qt5) -> QGIS 4 (Qt6) plugin migration procedure. Refers to
     pyqgis-dev's scripts by relative path - vendor both together or not
     at all.
+
+ansible-good-practices:
+  repo: https://github.com/leogallego/claude-ansible-skills.git
+  folder: leogallego-ansible
+  subpath: ansible-good-practices/skills/ansible-good-practices
+  ref: 2c43de8f4b180342f05f5e670cc7e6e8ae359ec4
+  ref_label: corresponds to v1.2.4
+  license: GPLv3
+  extra_paths:
+    - subpath: ansible-good-practices/references
+      dest: references
+  notes: >
+    Review Ansible code against Red Hat CoP automation good practices.
+    Use when the user wants to audit, lint, review, check, or validate
+    Ansible roles, playbooks, collections, or inventory
+    for compliance with CoP rules.
+
+ansible-new-molecule:
+  repo: https://github.com/leogallego/claude-ansible-skills.git
+  folder: leogallego-ansible
+  subpath: ansible-new-molecule/skills/ansible-new-molecule
+  ref: 2c43de8f4b180342f05f5e670cc7e6e8ae359ec4
+  ref_label: corresponds to v1.2.4
+  license: GPLv3
+  extra_paths:
+    - subpath: ansible-new-molecule/references
+      dest: references
+  notes: >
+    Scaffold molecule testing for an Ansible role or collection following
+    the current molecule testing philosophy (Ansible-native everything).
+    SKILL.md loads reference docs (e.g. molecule-patterns.md) via relative
+    "references/..." paths, so the sibling references/ directory is
+    vendored alongside SKILL.md.
+
+ansible-new-role:
+  repo: https://github.com/leogallego/claude-ansible-skills.git
+  folder: leogallego-ansible
+  subpath: ansible-new-role/skills/ansible-new-role
+  ref: 2c43de8f4b180342f05f5e670cc7e6e8ae359ec4
+  ref_label: corresponds to v1.2.4
+  license: GPLv3
+  extra_paths:
+    - subpath: ansible-new-role/references
+      dest: references
+  notes: >
+    Scaffold a new Ansible role following Red Hat CoP good practices.
+    Requires ansible-creator for generated skeletons when available
+    (otherwise falls back to manual scaffolding); optionally uses the
+    ansible-know MCP server for module-aware task generation. SKILL.md
+    loads bundled references, so the sibling references/ directory is
+    vendored alongside it.
