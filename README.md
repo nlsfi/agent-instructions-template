@@ -64,6 +64,13 @@ pinned SHA, label, license, and vendoring date. A Git installation and network
 access to the selected repositories are required. The current skills are
 grouped under `.agents/skills/gispo-coding-pyqgis/`.
 
+Some upstream repos keep supporting material (e.g. a `references/`
+directory) as a sibling of the skill folder rather than nested inside it.
+A registry entry's optional `extra_paths` list (each item: `subpath` +
+`dest`) vendors those sibling directories alongside `SKILL.md`, at
+`.agents/skills/<folder>/<name>/<dest>/`. `EXTERNAL_SKILLS.md` annotates any
+skill that vendored extra paths, e.g. `` `folder/name` (+references) ``.
+
 Vendored directories are replaced wholesale on the next `copier update`; do
 not edit them in place. Fork a skill into a separately named local skill if
 you need to customize it. Check the registry notes for related skills that

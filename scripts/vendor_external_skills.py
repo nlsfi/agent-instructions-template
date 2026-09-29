@@ -9,6 +9,12 @@ Reads:
   - <consumer repo>/.agents/skills/vendor-selection.yml (rendered by copier
     from this run's answers - see template/.agents/skills/vendor-selection.yml.jinja)
 
+A registry entry's `subpath` points at the folder containing SKILL.md. Some
+upstream repos keep supporting material (e.g. a `references/` directory) as
+a sibling of the skill folder rather than nested inside it. The optional
+`extra_paths` list on a registry entry (each item: `subpath` + `dest`) vendors
+those sibling directories alongside SKILL.md, at <folder>/<name>/<dest>/.
+
 Idempotent: safe to re-run via `copier update`. Existing vendored folders
 are replaced wholesale, not merged - if a skill needs a local tweak, fork
 it into your own skills tree under a different name rather than editing
@@ -38,12 +44,24 @@ SKILLS_DIR = DEST_ROOT / ".agents" / "skills"
 MANIFEST_PATH = SKILLS_DIR / "EXTERNAL_SKILLS.md"
 COMMIT_SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 FOLDER_NAME_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+# Multi-segment relative path, e.g. "plugin-root/references" - no absolute
+# paths, no ".." segments, no unsafe characters.
+SAFE_RELATIVE_PATH_PATTERN = re.compile(
+    r"^[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+)
 
 
 def load_yaml(path: Path) -> dict:
     if not path.exists():
         return {}
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def is_safe_relative_path(value: object) -> bool:
+    """True for a non-empty relative path with no ".."/"." segments."""
+    if not isinstance(value, str) or not SAFE_RELATIVE_PATH_PATTERN.fullmatch(value):
+        return False
+    return all(segment not in (".", "..") for segment in value.split("/"))
 
 
 def resolve_commit_sha(repo_dir: Path) -> str:
@@ -86,6 +104,35 @@ def validate_registry(registry: dict) -> None:
             )
             sys.exit(1)
         folder_metadata[folder] = metadata
+
+        subpath = entry.get("subpath")
+        if not is_safe_relative_path(subpath):
+            print(
+                f"::error:: Registry entry '{name}' has invalid subpath "
+                f"{subpath!r}; expected a safe repo-relative path.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        extra_paths = entry.get("extra_paths", [])
+        if extra_paths and not isinstance(extra_paths, list):
+            print(
+                f"::error:: Registry entry '{name}' has invalid extra_paths "
+                f"{extra_paths!r}; expected a list of {{subpath, dest}} items.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        for item in extra_paths:
+            item_subpath = item.get("subpath") if isinstance(item, dict) else None
+            item_dest = item.get("dest") if isinstance(item, dict) else None
+            if not is_safe_relative_path(item_subpath) or not is_safe_relative_path(item_dest):
+                print(
+                    f"::error:: Registry entry '{name}' has an invalid "
+                    f"extra_paths item {item!r}; expected safe 'subpath' and "
+                    "'dest' relative paths.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
 
 
 def clone_at_ref(repo_url: str, ref: str, tmp_dir: Path) -> Path:
@@ -169,14 +216,32 @@ def vendor_one(
         target.mkdir(parents=True)
         shutil.copytree(source_skill_dir, target, dirs_exist_ok=True)
 
+        extra_paths = entry.get("extra_paths", [])
+        for item in extra_paths:
+            source_extra_dir = repo_dir / item["subpath"]
+            if not source_extra_dir.is_dir():
+                print(
+                    f"::error:: extra_paths subpath {item['subpath']!r} not "
+                    f"found in {entry['repo']} @ {ref} for '{name}' - "
+                    "registry entry may be stale.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            shutil.copytree(source_extra_dir, target / item["dest"], dirs_exist_ok=True)
+
         if folder not in license_folders:
             license_file = repo_dir / "LICENSE"
             if license_file.exists():
                 shutil.copy(license_file, group_dir / "THIRD_PARTY_LICENSE")
             license_folders.add(folder)
 
+    extra_dest_names = [item["dest"] for item in extra_paths]
+    skill_cell = f"`{folder}/{name}`"
+    if extra_dest_names:
+        skill_cell += f" (+{', '.join(extra_dest_names)})"
+
     manifest_lines.append(
-        f"| `{folder}/{name}` | {entry['repo']} | `{ref}` ({entry.get('ref_label', '')}; "
+        f"| {skill_cell} | {entry['repo']} | `{ref}` ({entry.get('ref_label', '')}; "
         f"resolved `{resolved_sha}`) "
         f"| {entry['license']} | {date.today().isoformat()} |"
     )
