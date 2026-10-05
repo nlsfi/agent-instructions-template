@@ -20,16 +20,17 @@ Copier writes selected skill files under `.agents/skills/` and a
 
 Enabled modules render as:
 
-- `.agents/skills/nls/python/SKILL.md`
-- `.agents/skills/nls/java/SKILL.md`
-- `.agents/skills/nls/sql/SKILL.md`
-- `.agents/skills/nls/ansible/SKILL.md`
-- `.agents/skills/nls/jenkins/SKILL.md`
-- `.agents/skills/nls/qgis/SKILL.md`
-- `.agents/skills/nls/airflow/SKILL.md`
+- `.agents/skills/nls-python/SKILL.md`
+- `.agents/skills/nls-java/SKILL.md`
+- `.agents/skills/nls-sql/SKILL.md`
+- `.agents/skills/nls-ansible/SKILL.md`
+- `.agents/skills/nls-jenkins/SKILL.md`
+- `.agents/skills/nls-qgis/SKILL.md`
+- `.agents/skills/nls-airflow/SKILL.md`
 
 Disabled modules do not create their corresponding module directory under
-`.agents/skills/nls/`.
+`.agents/skills/`. The `.agents/skills/nls-ai-housekeeping/` directory is always
+rendered.
 
 ### Updating shared skills
 
@@ -43,6 +44,10 @@ The `--trust` flag is needed for [vendoring external skills](#vendoring-external
 
 Copier diffs the new template against the previous version and proposes
 changes; review and accept as needed.
+
+The NLS skills now use flat `nls-*` directories instead of the previous
+`.agents/skills/nls/<module>/` layout. After updating an existing repository,
+remove any stale directories from the old layout if they remain.
 
 ### Adding a new module to an existing repo
 
@@ -93,7 +98,7 @@ up separately.
 ### Optional shared-symlink distribution
 
 If your organization maintains a shared skills repository, you can symlink
-`.agents/skills/nls/*` directories into consumer repos instead of using Copier
+`.agents/skills/nls-*` directories into consumer repos instead of using Copier
 for ongoing propagation.
 
 ---
