@@ -3,7 +3,7 @@ name: nls-ansible
 description: NLS Ansible conventions for playbooks and roles: module choice, idempotency, variable scoping, loop structure, and secret handling.
 ---
 
-## Module usage
+## Module usage  <!-- markdownlint-disable-line MD041 -->
 
 - Prefer Ansible modules over `command` and `shell` when an equivalent module exists.
 - Use fully qualified collection names (FQCN), for example `ansible.builtin.copy`.
