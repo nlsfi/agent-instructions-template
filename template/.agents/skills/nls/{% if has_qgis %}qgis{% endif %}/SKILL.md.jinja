@@ -35,3 +35,9 @@ description: NLS QGIS plugin and PyQGIS conventions for threading, SIP object li
 - Prefer QGIS Processing algorithms over shelling out or reimplementing core geoprocessing.
 - Keep plugin teardown explicit: stop timers and disconnect signals in `deactivate()`.
 - If plugin reload causes duplicate handlers, check for missing disconnects before deeper refactors.
+
+## Translation files
+
+- Never directly edit translation files with the `.ts` or `.qm` suffix.
+- Update `.ts` files by running `qpdt ts` with the project's virtual environment active; this step may be left to the developer.
+- Agents must not attempt to use Qt Linguist. After `.ts` files are updated, leave adding translations and releasing them to update the `.qm` files in Qt Linguist to the developer.
