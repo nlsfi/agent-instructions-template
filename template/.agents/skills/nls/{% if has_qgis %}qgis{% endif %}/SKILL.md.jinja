@@ -1,21 +1,11 @@
 ---
 name: nls-qgis
-description: NLS QGIS plugin and PyQGIS conventions for threading, SIP object lifetime, CRS handling, feature editing, and processing workflows.
+description: NLS QGIS plugin and PyQGIS conventions for resource cleanup, CRS handling, feature editing, processing workflows, and translation files.
 ---
 
-## Threading
+## Resource cleanup
 
-- Never access `QgsVectorLayer`, data providers, or `layer.getFeatures()` from background threads.
-- Fetch features on the main thread, then pass plain Python data to worker threads.
-- Never touch `QgsProject.instance()`, map canvas, or Qt widgets from workers.
-- Return worker results via Qt signals instead of shared mutable state.
-
-## Object lifetime and ownership
-
-- Treat SIP-wrapped objects as mixed Python/C++ ownership; avoid relying on implicit garbage collection timing.
-- Keep a strong reference to memory-provider layers unless they are owned by the project.
 - Release GDAL datasets explicitly (`dataset = None`) when processing completes.
-- Disconnect long-lived signal connections when tools or widgets are deactivated.
 
 ## CRS handling
 
@@ -26,8 +16,7 @@ description: NLS QGIS plugin and PyQGIS conventions for threading, SIP object li
 ## Feature access and editing
 
 - Use `QgsFeatureRequest` to limit attributes, geometry, and feature subsets early.
-- Do not mutate layer features while iterating a live provider iterator.
-- For edits, use `startEditing()` and always check `commitChanges()` return value.
+- Always check the `commitChanges()` return value when committing edits.
 - Call `updateFields()` after schema changes and `updateExtents()` after geometry inserts.
 
 ## Processing and plugin workflow
