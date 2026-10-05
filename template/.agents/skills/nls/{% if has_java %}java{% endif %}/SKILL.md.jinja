@@ -3,7 +3,7 @@ name: nls-java
 description: NLS Java coding conventions for .java changes, including dependency injection, naming, null-handling, comment rules, and JUnit testing patterns.
 ---
 
-## Types and null-handling
+## Types and null-handling  <!-- markdownlint-disable-line MD041 -->
 
 - Never return `null`; return `Optional<T>` for a possibly-absent single value and an empty collection for absent lists/sets/maps.
 - Use `var` for local variables only when the type is obvious from the right-hand side.

@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-template:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Create build dir
+        run: mkdir -p "${RUNNER_TEMP}/test-template"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+
+      - name: Create skills from template
+        working-directory: ${{ runner.temp }}/test-template
+        run: |
+          uvx --from copier copier copy --trust --defaults --vcs-ref=HEAD \
+            --data 'has_python=true' \
+            --data 'has_java=true' \
+            --data 'has_sql=true' \
+            --data 'has_ansible=true' \
+            --data 'has_jenkins=true' \
+            --data 'has_qgis=true' \
+            --data 'has_airflow=true' \
+            --data 'use_external_skills=false' \
+            "${GITHUB_WORKSPACE}" .
+
+      - name: Run prek
+        working-directory: ${{ runner.temp }}/test-template
+        run: |
+          cp "${GITHUB_WORKSPACE}/.pre-commit-config.yaml" .pre-commit-config.yaml
+          cp "${GITHUB_WORKSPACE}/.yamllint" .yamllint
+          cp "${GITHUB_WORKSPACE}/.markdownlint.jsonc" .markdownlint.jsonc
+          git init && git add --all
+          uvx --from prek prek run --show-diff-on-failure --color=always --all-files
+
+      # Just check that copier command passes, can't lint files
+      - name: Recreate skills from template with external skills
+        working-directory: ${{ runner.temp }}/test-template
+        run: |
+          uvx --from copier copier recopy --force --trust --vcs-ref=HEAD \
+            --data 'use_external_skills=true' \
+            --data 'external_skills=[pyqgis-dev,qgis4-migration,ansible-good-practices,ansible-new-molecule,ansible-new-role]'
