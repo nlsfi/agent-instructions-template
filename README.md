@@ -9,7 +9,7 @@ Copier manages conditional skill installation.
 
 Run `copier copy` from the target repository root and answer the prompts:
 
-```
+```bash
 copier copy --trust --answers-file .copier-answers.agent-instructions.yml https://github.com/nlsfi/agent-instructions-template.git .
 ```
 
@@ -33,7 +33,7 @@ Disabled modules do not create their corresponding module directory under
 
 When the template is updated, pull changes into the consumer repo:
 
-```
+```bash
 copier update --trust --answers-file .copier-answers.agent-instructions.yml
 ```
 
@@ -96,9 +96,9 @@ for ongoing propagation.
 
 ## Development environment
 
-Create a virtual environment and install `pre-commit`:
+Create a virtual environment and install `prek`:
 
-```powershell
-pip install pre-commit
-pre-commit install
+```bash
+pip install prek
+prek install
 ```

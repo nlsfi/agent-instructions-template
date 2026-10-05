@@ -3,7 +3,7 @@ name: nls-ai-housekeeping
 description: Manual two-stage procedure for auditing and refreshing AI-agent instruction and repository documentation, keeping one clear source of truth, and handing Copier-managed updates back to a developer.
 ---
 
-## A. When to use
+## A. When to use  <!-- markdownlint-disable-line MD041 -->
 
 Use this skill only when a developer explicitly asks for AI instruction housekeeping.
 

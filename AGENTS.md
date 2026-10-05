@@ -1,6 +1,7 @@
 # AGENTS.md
 
 ## Project overview
+
 This repo is the Copier template source for the `Agent Skills` system used across NLS repositories.
 The `template/` directory contains files that Copier copies and renders into a target repository;
 those files are used by agents in the target repository, not as this repository's own instructions.
@@ -14,6 +15,7 @@ its own `AGENTS.md` for editing the template source. A target repository has its
 appears in the generated target layout; the `.agents/` path under `template/` is Copier source.
 
 ## Template source versus target instructions
+
 - Skills and other instruction files under `template/` are Copier source files only. They are never
   loaded or used as agent instructions while working in this repository; they are used only in
   target repositories after Copier renders them.
@@ -23,6 +25,7 @@ appears in the generated target layout; the `.agents/` path under `template/` is
   rendered `.agents/skills/nls/...` files.
 
 ## Tech stack
+
 - **Markdown** — all template content and architecture docs
 - **YAML** — pre-commit and Copier configuration
 - **pre-commit** (Python CLI) — sole build/lint tool; install via `pip install pre-commit`
@@ -31,7 +34,8 @@ appears in the generated target layout; the `.agents/` path under `template/` is
 - **Node 24.10.0** — declared as default language version for pre-commit (reserved for future hooks)
 
 ## Project structure
-```
+
+```text
 agent-instructions-template/
 ├── .github/exploration/             ← Architecture decision records (not CI workflows)
 ├── template/                        ← Copier _subdirectory; copied/rendered into target repositories
@@ -54,6 +58,7 @@ agent-instructions-template/
 ├── .editorconfig                    ← Indentation and line-ending rules per file type
 └── README.md                        ← Consumer usage and dev setup
 ```
+
 New template module files go under the source path `template/.agents/skills/nls/` and use
 Jinja-conditional module directory names (`{% if has_python %}python{% endif %}`). Copier renders
 these source paths into `.agents/skills/nls/` in target repositories, so disabled modules do not
@@ -76,6 +81,7 @@ Consumer repositories select skill names only; they cannot choose the version
 to fetch.
 
 ## Module instructions routing
+
 - Consumer repositories should keep explicit routing lines in their root `AGENTS.md`.
 - Example: "When editing Python files, load `nls-python`; when editing Ansible roles, load `nls-ansible`."
 - Add explicit routing for vendored skills when they are needed for a domain;
@@ -86,20 +92,24 @@ to fetch.
 - Do not rely on auto-discovery alone for domains where missing the skill can cause regressions.
 
 ## Build and test commands
+
 There is no application build or test suite. The pre-commit hooks are the quality gate.
 
 One-time setup (from repo root):
-```
+
+```bash
 pip install pre-commit
 pre-commit install
 ```
 
 Run all checks manually:
-```
+
+```bash
 pre-commit run --all-files
 ```
 
 Hooks that run on `pre-commit`:
+
 - `trailing-whitespace` (Markdown linebreak extension preserved)
 - `end-of-file-fixer`
 - `mixed-line-ending` — enforces LF for all files; CRLF only for `.bat`
@@ -107,17 +117,21 @@ Hooks that run on `pre-commit`:
 - `check-merge-conflict`
 
 Hook that runs on `commit-msg`:
+
 - `gitlint` — enforces Conventional Commits format (see **Conventions** below)
 
 ## Conventions
+
 **Commit messages (gitlint enforced):**
+
 - Allowed types: `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style`, `test`
 - Title length: 10–72 characters
-- The word immediately after `type: ` must be lowercase (regex: `: [^A-Z]`)
+- The word immediately after `type:` must be lowercase (regex: `: [^A-Z]`)
 - The word `wip` is banned in the title
 - Body lines: max 80 characters
 
 **Formatting (.editorconfig enforced):**
+
 - YAML and Markdown: 2-space indent
 - Python: 4-space indent
 - SQL: 2-space indent
@@ -126,10 +140,12 @@ Hook that runs on `commit-msg`:
 **No inline comments** in Markdown template files unless documenting a non-obvious Copier/Jinja behaviour.
 
 ## Do not modify
+
 - Frozen commit SHAs in `.pre-commit-config.yaml` — only update via `pre-commit autoupdate`, not by hand
 - `.github/exploration/` — treat as append-only reference material
 
 ## Known pitfalls
+
 1. **PowerShell + Jinja path parts**: Copier template paths may contain Jinja expressions in directory
    names. In PowerShell, wrap such names in single quotes (e.g. `'{% if has_python %}python{% endif %}'`)
    to prevent `{}` being parsed as a script block.
