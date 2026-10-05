@@ -13,6 +13,8 @@ Run `copier copy` from the target repository root and answer the prompts:
 copier copy --trust --answers-file .copier-answers.agent-instructions.yml https://github.com/nlsfi/agent-instructions-template.git .
 ```
 
+The `--trust` flag is needed for [vendoring external skills](#vendoring-external-skills).
+
 Copier writes selected skill files under `.agents/skills/` and a
 `.copier-answers.yml` that records your choices for future updates.
 
@@ -36,6 +38,8 @@ When the template is updated, pull changes into the consumer repo:
 ```bash
 copier update --trust --answers-file .copier-answers.agent-instructions.yml
 ```
+
+The `--trust` flag is needed for [vendoring external skills](#vendoring-external-skills).
 
 Copier diffs the new template against the previous version and proposes
 changes; review and accept as needed.

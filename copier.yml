@@ -59,6 +59,7 @@ external_skills:
 _subdirectory: template
 
 _tasks:
-  - "python3 {{ _copier_conf.src_path }}/scripts/vendor_external_skills.py"
+  - command: "python3 {{ _copier_conf.src_path }}/scripts/vendor_external_skills.py"
+    when: "{{ external_skills | length > 0 }}"
 
 _min_copier_version: "9.10.0"
