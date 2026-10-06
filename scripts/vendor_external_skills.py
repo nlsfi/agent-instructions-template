@@ -1,7 +1,7 @@
 """
 Copier post-generation task (invoked from copier.yml's `_tasks`). Vendors
 selected external Agent Skills (SKILL.md folders) from curated third-party
-repos into .agents/skills/<folder>/<name>/ in the consumer repo, pinned to a
+repos into .agents/skills/<folder>-<name>/ in the consumer repo, pinned to a
 specific ref, and writes a human-readable manifest.
 
 Reads:
@@ -13,7 +13,7 @@ A registry entry's `subpath` points at the folder containing SKILL.md. Some
 upstream repos keep supporting material (e.g. a `references/` directory) as
 a sibling of the skill folder rather than nested inside it. The optional
 `extra_paths` list on a registry entry (each item: `subpath` + `dest`) vendors
-those sibling directories alongside SKILL.md, at <folder>/<name>/<dest>/.
+those sibling directories alongside SKILL.md, at <folder>-<name>/<dest>/.
 
 Idempotent: safe to re-run via `copier update`. Existing vendored folders
 are replaced wholesale, not merged - if a skill needs a local tweak, fork
@@ -73,9 +73,18 @@ def resolve_commit_sha(repo_dir: Path) -> str:
 
 
 def validate_registry(registry: dict) -> None:
-    """Validate pins and ensure each folder has one source and license."""
+    """Validate pins, destination names, and folder source/license consistency."""
     folder_metadata: dict[str, tuple[str, str]] = {}
+    destination_names: set[str] = set()
     for name, entry in registry.items():
+        if not isinstance(name, str) or not FOLDER_NAME_PATTERN.fullmatch(name):
+            print(
+                f"::error:: Registry entry has invalid skill name {name!r}; "
+                "expected one safe directory name.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
         ref = entry.get("ref") if isinstance(entry, dict) else None
         if not isinstance(ref, str) or not COMMIT_SHA_PATTERN.fullmatch(ref):
             print(
@@ -93,6 +102,16 @@ def validate_registry(registry: dict) -> None:
                 file=sys.stderr,
             )
             sys.exit(1)
+
+        destination_name = f"{folder}-{name}"
+        if destination_name in destination_names:
+            print(
+                f"::error:: Registry entries produce duplicate destination "
+                f"'{destination_name}'.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+        destination_names.add(destination_name)
 
         metadata = (entry.get("repo"), entry.get("license"))
         previous = folder_metadata.get(folder)
@@ -168,7 +187,6 @@ def vendor_one(
     name: str,
     registry: dict,
     manifest_lines: list[str],
-    license_folders: set[str],
 ) -> None:
     entry = registry.get(name)
     if entry is None:
@@ -182,8 +200,8 @@ def vendor_one(
 
     ref = entry["ref"]
     folder = entry["folder"]
-    group_dir = SKILLS_DIR / folder
-    target = group_dir / name
+    destination_name = f"{folder}-{name}"
+    target = SKILLS_DIR / destination_name
     print(
         f"Vendoring '{name}' from {entry['repo']} @ {ref} "
         f"({entry.get('ref_label', 'unlabeled')}) -> {target}"
@@ -210,7 +228,7 @@ def vendor_one(
             )
             sys.exit(1)
 
-        group_dir.mkdir(parents=True, exist_ok=True)
+        target.parent.mkdir(parents=True, exist_ok=True)
         if target.exists():
             shutil.rmtree(target)
         target.mkdir(parents=True)
@@ -229,14 +247,12 @@ def vendor_one(
                 sys.exit(1)
             shutil.copytree(source_extra_dir, target / item["dest"], dirs_exist_ok=True)
 
-        if folder not in license_folders:
-            license_file = repo_dir / "LICENSE"
-            if license_file.exists():
-                shutil.copy(license_file, group_dir / "THIRD_PARTY_LICENSE")
-            license_folders.add(folder)
+        license_file = repo_dir / "LICENSE"
+        if license_file.exists():
+            shutil.copy(license_file, target / "THIRD_PARTY_LICENSE")
 
     extra_dest_names = [item["dest"] for item in extra_paths]
-    skill_cell = f"`{folder}/{name}`"
+    skill_cell = f"`{destination_name}`"
     if extra_dest_names:
         skill_cell += f" (+{', '.join(extra_dest_names)})"
 
@@ -251,14 +267,14 @@ def write_manifest(manifest_lines: list[str]) -> None:
     header = (
         "# External Agent Skills\n\n"
         "Vendored copies of third-party Agent Skills. **Do not hand-edit "
-        "the contents of `.agents/skills/<folder>/<name>/`** - changes are "
+        "the contents of `.agents/skills/<folder>-<name>/`** - changes are "
         "overwritten on the next `copier update`. To adjust a skill, "
         "propose the change upstream or fork it into your own skills "
         "tree under a different name.\n\n"
         "To change what's vendored, edit the `external_skills` answer and run:\n"
         "`copier update --trust --answers-file .copier-answers.agent-instructions.yml`\n\n"
         f"_Last vendored: {datetime.now(timezone.utc).isoformat(timespec='seconds')}_\n\n"
-        "| Skill (folder/name) | Source | Pinned ref (resolved SHA) | License | Vendored on |\n"
+        "| Skill directory | Source | Pinned ref (resolved SHA) | License | Vendored on |\n"
         "|---|---|---|---|---|\n"
     )
     MANIFEST_PATH.write_text(header + "\n".join(manifest_lines) + "\n", encoding="utf-8")
@@ -275,7 +291,7 @@ def main() -> None:
             print(
                 "No external skills selected this run; leaving existing "
                 "vendored folders in place; consumers can remove old or "
-                "unselected .agents/skills/<folder>/<name>/ folders "
+                "unselected .agents/skills/<folder>-<name>/ folders "
                 "manually if no longer wanted)."
             )
         return
@@ -283,9 +299,8 @@ def main() -> None:
     SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
     manifest_lines: list[str] = []
-    license_folders: set[str] = set()
     for name in skills:
-        vendor_one(name, registry, manifest_lines, license_folders)
+        vendor_one(name, registry, manifest_lines)
 
     write_manifest(manifest_lines)
     print(f"Vendored {len(skills)} external skill(s). See {MANIFEST_PATH}.")

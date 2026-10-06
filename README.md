@@ -66,20 +66,24 @@ fetched. The current choices include
 
 Each registry entry pins a selected skill to a 40-character commit SHA and
 includes a human-readable `ref_label`; consumers cannot override that pin.
-Each registry entry also specifies a destination folder. Selected skills are
-copied to `.agents/skills/<folder>/<name>/`, with one `THIRD_PARTY_LICENSE`
-file per folder. The task fetches the exact registry commit and writes
+Each registry entry also specifies a repository folder prefix. Selected
+skills are copied to `.agents/skills/<folder>-<name>/`, with `folder` from
+the registry followed by the skill name; for example,
+`.agents/skills/gispo-coding-pyqgis-dev/SKILL.md`. Any upstream
+`LICENSE` is copied into that skill directory as `THIRD_PARTY_LICENSE`. The task fetches
+the exact registry commit and writes
 `.agents/skills/EXTERNAL_SKILLS.md` with the destination, source repository,
 pinned SHA, label, license, and vendoring date. A Git installation and network
 access to the selected repositories are required. The current skills are
-grouped under `.agents/skills/gispo-coding-pyqgis/`.
+from the `gispo-coding-pyqgis` and `leogallego-ansible` repository prefixes.
 
 Some upstream repos keep supporting material (e.g. a `references/`
 directory) as a sibling of the skill folder rather than nested inside it.
 A registry entry's optional `extra_paths` list (each item: `subpath` +
 `dest`) vendors those sibling directories alongside `SKILL.md`, at
-`.agents/skills/<folder>/<name>/<dest>/`. `EXTERNAL_SKILLS.md` annotates any
-skill that vendored extra paths, e.g. `` `folder/name` (+references) ``.
+`.agents/skills/<folder>-<name>/<dest>/`. `EXTERNAL_SKILLS.md` annotates any
+skill that vendored extra paths, e.g.
+`` `gispo-coding-pyqgis-qgis4-migration` (+references) ``.
 
 The Ansible skills provide distinct workflows: `ansible-good-practices`
 reviews existing automation, `ansible-new-molecule` scaffolds Molecule tests,
@@ -93,7 +97,8 @@ not edit them in place. Fork a skill into a separately named local skill if
 you need to customize it. Check the registry notes for related skills that
 must be selected together, such as `qgis4-migration` and `pyqgis-dev`. The
 task does not remove old or unselected directories; consumers can clean those
-up separately.
+up separately. After the layout change, remove old external-skill directories
+that remain under `.agents/skills/<folder>/<name>/`.
 
 ### Optional shared-symlink distribution
 

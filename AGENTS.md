@@ -74,10 +74,12 @@ and fetch the selected sources into the consumer repository. Each registry
 entry must identify a repository, a 40-character lowercase commit `ref`, a
 documentation-only `ref_label`, a safe destination `folder`, a skill
 `subpath` containing `SKILL.md`, and the applicable license. Skills are
-fetched into `.agents/skills/<folder>/<name>/` and share one
-`THIRD_PARTY_LICENSE` file per folder. All entries in one folder must use the
-same repository and license; incompatible groupings are rejected and must use
-separate folders. Keep dependency or setup information in `notes`.
+fetched into `.agents/skills/<folder>-<name>/`, where `folder` is the repo
+prefix and `name` is the registry skill name. An upstream `LICENSE` is copied
+to each skill directory as `THIRD_PARTY_LICENSE`; supporting paths are copied
+alongside `SKILL.md`. All entries in one folder must use the same repository
+and license; incompatible groupings are rejected and must use separate
+folders. Keep dependency or setup information in `notes`.
 Consumer repositories select skill names only; they cannot choose the version
 to fetch.
 
@@ -153,7 +155,7 @@ Hook that runs on `commit-msg`:
 2. **pre-commit not installed**: Hooks only run after `pre-commit install`. On a fresh clone, committing
    without running that command will bypass all checks silently.
 3. **External skill updates are destructive by design**: The vendoring task replaces each selected
-   `.agents/skills/<folder>/<name>/` directory wholesale. Do not hand-edit a vendored copy; fork it
+   `.agents/skills/<folder>-<name>/` directory wholesale. Do not hand-edit a vendored copy; fork it
    under a different name for local changes. Cleanup of old or unselected directories is the
    consumer's responsibility.
 4. **External skill prerequisites**: Vendoring requires Git and network access. A stale registry entry
