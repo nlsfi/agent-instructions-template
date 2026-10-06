@@ -1,2 +1,6 @@
 # virtual environments
 .venv
+
+# IntelliJ IDEA config
+agent-instructions-template.iml
+.idea/
