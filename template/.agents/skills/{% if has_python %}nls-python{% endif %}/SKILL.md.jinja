@@ -25,3 +25,13 @@ description: NLS Python coding conventions for .py changes, including type hints
 - Do not add comments in test code.
 - Use `pytest` fixtures for setup and teardown.
 - Use `pytest.mark.parametrize` when testing multiple input values.
+- Prefer pytest-mock's `mocker.patch` over `mocker.patch.object` and
+ `monkeypatch.setattr`; annotate `mocker` as `pytest_mock.MockerFixture`.
+- When only observing whether or how a function or method is called, prefer
+ `mocker.spy` if running its real implementation is safe and appropriate; a spy
+ records calls while preserving that behavior.
+- Use `mocker.patch` when the test needs to replace behavior, isolate side effects,
+ or control return values or exceptions.
+- Patch dependencies where they are looked up by the module under test, usually the
+ imported symbol or module, rather than at their original definition.
+- Use `MagicMock` imported from `unittest.mock` instead of `Mock`.
