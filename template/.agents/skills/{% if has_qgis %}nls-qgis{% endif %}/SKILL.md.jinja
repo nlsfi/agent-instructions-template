@@ -25,6 +25,10 @@ description: NLS QGIS plugin and PyQGIS conventions for resource cleanup, CRS ha
 - Keep plugin teardown explicit: stop timers and disconnect signals in `deactivate()`.
 - If plugin reload causes duplicate handlers, check for missing disconnects before deeper refactors.
 
+## Styles
+
+- Rendering hangs in waitForFinished(): Cross-layer expressions such as aggregate() can require main-thread execution. Blocking the GUI thread while waiting for a background renderer can deadlock. Keep Qt events processing while awaiting finished; in pytest, connect with qtbot.waitSignal(job.finished, timeout=...) before calling job.start()
+
 ## Translation files
 
 - Never directly edit translation files with the `.ts` or `.qm` suffix.
